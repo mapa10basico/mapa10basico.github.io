@@ -1,0 +1,1710 @@
+<!doctype html>
+<html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+      <meta name="mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <!--link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"-->
+
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+      <link rel="stylesheet" href="css/leaflet.css">
+      <link rel="stylesheet" href="css/qgis2web.css">
+      <link rel="stylesheet" href="css/fontawesome-all.min.css">
+      <link rel="stylesheet" href="css/leaflet-search.css">
+      <link rel="stylesheet" href="css/filter.css">
+      <link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        #header {
+            height: 100px;
+            background-color: #e68a00;
+        }
+        #map {
+            height: 500px;
+        }
+
+        #side_panel {
+            height: 500px;
+            background-color:#ffe6cc;
+        }
+
+        #side_panel2 {
+            height: 500px;
+            background-color:#ffe6cc;
+        }
+
+
+        #footer {
+            height:160px;
+            background-color: white;
+        }
+
+
+        </style>
+        <title>ODAS/B</title>
+    </head>
+    <body>
+
+      <div id="header" class="col-md-12">
+          <h1 class="text-center">Oportunidades de Aprendizaje del Ciclo Básico</h1>
+      </div>
+
+      <div id="side_panel" class="col-md-3">
+          <h1 class="text-center">Departamentos</h1>
+      <div id="menup"></div>
+      <div class="vertical-menu">
+      <div id="caspa"></div>
+
+      </div>
+
+      </div >
+      <div id="map" class="col-md-9"></div>
+      <!-- NUEVO -->
+      <div id="tables">
+
+      </div>
+      <table id="Table_municipio" class="table">
+        <tbody id="tbody_municipio"></tbody>
+      </table>
+
+      <div id="footer" class="col-md-12">
+          <h1 class="text-center"> <img src="images/logo.png"></h1>
+          <h6 class="text-right"><a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a></h6>
+      </div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+        <script src="js/nouislider.min.js"></script>
+        <script src="js/wNumb.js"></script>
+        <script src="data/Departamentos_1.js"></script>
+        <script src="data/ODA7Cobertura_2.js"></script>
+        <script src="data/ODA6Infra_3.js"></script>
+        <script src="data/ODA5Librosyequipo_4.js"></script>
+        <script src="data/ODA3CNB_5.js"></script>
+        <script src="data/ODA2Directores_6.js"></script>
+        <script src="data/ODA1Docentes_7.js"></script>
+        <script src="data/CostototalODas_8.js"></script>
+        <script>
+
+
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
+
+
+
+
+
+
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:21, minZoom:5
+        }).fitBounds([[13.636601088301632,-92.8436020418243],[17.92037403925385,-87.61808812042146]]);
+        var hash = new L.Hash(map);
+
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        var layer_OpenStreetMap_0 = L.tileLayer('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 5,
+            maxZoom: 21,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OpenStreetMap_0;
+        map.addLayer(layer_OpenStreetMap_0);
+        function pop_Departamentos_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nombre'] !== null ? Autolinker.link(String(feature.properties['nombre'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Departamentos_1_0() {
+            return {
+                pane: 'pane_Departamentos_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(141,90,153,0.01568627450980392)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Departamentos_1');
+        map.getPane('pane_Departamentos_1').style.zIndex = 401;
+        map.getPane('pane_Departamentos_1').style['mix-blend-mode'] = 'normal';
+        var layer_Departamentos_1 = new L.geoJson(json_Departamentos_1, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Departamentos_1',
+            layerName: 'layer_Departamentos_1',
+            pane: 'pane_Departamentos_1',
+            onEachFeature: pop_Departamentos_1,
+            style: style_Departamentos_1_0,
+        });
+        bounds_group.addLayer(layer_Departamentos_1);
+        map.addLayer(layer_Departamentos_1);
+        function pop_ODA7Cobertura_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Ampliacion secciones</th>\
+                        <td>' + (feature.properties['ampliacion secciones'] !== null ? Autolinker.link(String(feature.properties['ampliacion secciones'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo secciones nuevas</th>\
+                        <td>' + (feature.properties['costo ampliacion secciones'] !== null ? Autolinker.link(String(feature.properties['costo ampliacion secciones'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad centros</th>\
+                        <td>' + (feature.properties['cantidad centros'] !== null ? Autolinker.link(String(feature.properties['cantidad centros'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total nuevos centros</th>\
+                        <td>' + (feature.properties['costo ampliacion centros'] !== null ? Autolinker.link(String(feature.properties['costo ampliacion centros'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">estudiantes transporte</th>\
+                        <td>' + (feature.properties['estudiantes con transporte'] !== null ? Autolinker.link(String(feature.properties['estudiantes con transporte'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total transporte</th>\
+                        <td>' + (feature.properties['costo estudiantes transporte'] !== null ? Autolinker.link(String(feature.properties['costo estudiantes transporte'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">servicios</th>\
+                        <td>' + (feature.properties['Servicios'] !== null ? Autolinker.link(String(feature.properties['Servicios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA7</th>\
+                        <td>' + (feature.properties['Total'] !== null ? Autolinker.link(String(feature.properties['Total'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA7Cobertura_2_0(feature) {
+            if (feature.properties['Total'] >= 0.000000 && feature.properties['Total'] <= 1403756.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 1403756.000000 && feature.properties['Total'] <= 4031957.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,213,213,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 4031957.000000 && feature.properties['Total'] <= 7997414.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,170,170,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 7997414.000000 && feature.properties['Total'] <= 12547796.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,128,128,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 12547796.000000 && feature.properties['Total'] <= 16856597.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,85,85,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 16856597.000000 && feature.properties['Total'] <= 23637547.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,42,42,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['Total'] >= 23637547.000000 && feature.properties['Total'] <= 30641865.000000 ) {
+                return {
+                pane: 'pane_ODA7Cobertura_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA7Cobertura_2');
+        map.getPane('pane_ODA7Cobertura_2').style.zIndex = 402;
+        map.getPane('pane_ODA7Cobertura_2').style['mix-blend-mode'] = 'normal';
+        var layer_ODA7Cobertura_2 = new L.geoJson(json_ODA7Cobertura_2, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA7Cobertura_2',
+            layerName: 'layer_ODA7Cobertura_2',
+            pane: 'pane_ODA7Cobertura_2',
+            onEachFeature: pop_ODA7Cobertura_2,
+            style: style_ODA7Cobertura_2_0,
+        });
+        bounds_group.addLayer(layer_ODA7Cobertura_2);
+        function pop_ODA6Infra_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Aulas informales</th>\
+                        <td>' + (feature.properties['Aulas informales'] !== null ? Autolinker.link(String(feature.properties['Aulas informales'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Reemplazo aulas informales</th>\
+                        <td>' + (feature.properties['Reemplazo informales'] !== null ? Autolinker.link(String(feature.properties['Reemplazo informales'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Aulas no uso reparacion</th>\
+                        <td>' + (feature.properties['Aulas_no_uso Reparacion'] !== null ? Autolinker.link(String(feature.properties['Aulas_no_uso Reparacion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total aulas no uso reparacion</th>\
+                        <td>' + (feature.properties['Total Aulas_no_uso Reparacion'] !== null ? Autolinker.link(String(feature.properties['Total Aulas_no_uso Reparacion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Aulas en uso en regular estado</th>\
+                        <td>' + (feature.properties['Aulas_en_uso (estado regular)'] !== null ? Autolinker.link(String(feature.properties['Aulas_en_uso (estado regular)'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">aulas en uso en mal estado</th>\
+                        <td>' + (feature.properties['Aulas en uso (estado malo)'] !== null ? Autolinker.link(String(feature.properties['Aulas en uso (estado malo)'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total reparacion aulas</th>\
+                        <td>' + (feature.properties['total_repa'] !== null ? Autolinker.link(String(feature.properties['total_repa'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">sanitarios necesarios</th>\
+                        <td>' + (feature.properties['Deficit Sanitarios'] !== null ? Autolinker.link(String(feature.properties['Deficit Sanitarios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total sanitarios</th>\
+                        <td>' + (feature.properties['Total_Sanitarios'] !== null ? Autolinker.link(String(feature.properties['Total_Sanitarios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad escritorios</th>\
+                        <td>' + (feature.properties['Deficit Escritorios'] !== null ? Autolinker.link(String(feature.properties['Deficit Escritorios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total escritorios</th>\
+                        <td>' + (feature.properties['Total_Escritorios'] !== null ? Autolinker.link(String(feature.properties['Total_Escritorios'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad catedras</th>\
+                        <td>' + (feature.properties['Deficit catedras'] !== null ? Autolinker.link(String(feature.properties['Deficit catedras'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total catedras</th>\
+                        <td>' + (feature.properties['Total_Catedras'] !== null ? Autolinker.link(String(feature.properties['Total_Catedras'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad pizarras</th>\
+                        <td>' + (feature.properties['Deficit Pizarrones'] !== null ? Autolinker.link(String(feature.properties['Deficit Pizarrones'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total pizarras</th>\
+                        <td>' + (feature.properties['Total Pizarrones'] !== null ? Autolinker.link(String(feature.properties['Total Pizarrones'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA6</th>\
+                        <td>' + (feature.properties['total_oda6'] !== null ? Autolinker.link(String(feature.properties['total_oda6'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA6Infra_3_0(feature) {
+            if (feature.properties['total_oda6'] >= 0.000000 && feature.properties['total_oda6'] <= 1317024.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda6'] >= 1317024.000000 && feature.properties['total_oda6'] <= 2689462.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,204,204,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda6'] >= 2689462.000000 && feature.properties['total_oda6'] <= 4275799.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,153,153,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda6'] >= 4275799.000000 && feature.properties['total_oda6'] <= 6908605.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,102,102,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda6'] >= 6908605.000000 && feature.properties['total_oda6'] <= 15121175.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,51,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda6'] >= 15121175.000000 && feature.properties['total_oda6'] <= 30384124.000000 ) {
+                return {
+                pane: 'pane_ODA6Infra_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA6Infra_3');
+        map.getPane('pane_ODA6Infra_3').style.zIndex = 403;
+        map.getPane('pane_ODA6Infra_3').style['mix-blend-mode'] = 'normal';
+        var layer_ODA6Infra_3 = new L.geoJson(json_ODA6Infra_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA6Infra_3',
+            layerName: 'layer_ODA6Infra_3',
+            pane: 'pane_ODA6Infra_3',
+            onEachFeature: pop_ODA6Infra_3,
+            style: style_ODA6Infra_3_0,
+        });
+        bounds_group.addLayer(layer_ODA6Infra_3);
+        function pop_ODA5Librosyequipo_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">costo elaboracion textos</th>\
+                        <td>' + (feature.properties['elaboracio'] !== null ? Autolinker.link(String(feature.properties['elaboracio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Cantidad Textos</th>\
+                        <td>' + (feature.properties['Numero_Textos'] !== null ? Autolinker.link(String(feature.properties['Numero_Textos'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo Textos</th>\
+                        <td>' + (feature.properties['Total_textos'] !== null ? Autolinker.link(String(feature.properties['Total_textos'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad guias aprendi</th>\
+                        <td>' + (feature.properties['Numero guias'] !== null ? Autolinker.link(String(feature.properties['Numero guias'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo guias aprendi</th>\
+                        <td>' + (feature.properties['Guias_aprendizaje'] !== null ? Autolinker.link(String(feature.properties['Guias_aprendizaje'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad guias doc</th>\
+                        <td>' + (feature.properties['Num_Guias Docente Docente'] !== null ? Autolinker.link(String(feature.properties['Num_Guias Docente Docente'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo guias doc</th>\
+                        <td>' + (feature.properties['Costo_Guias Docentes'] !== null ? Autolinker.link(String(feature.properties['Costo_Guias Docentes'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">libros conceptos basicos</th>\
+                        <td>' + (feature.properties['Libros Concpts Basicos'] !== null ? Autolinker.link(String(feature.properties['Libros Concpts Basicos'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">costo conceptos basicos</th>\
+                        <td>' + (feature.properties['Costo_Lbros Concpts Basicos'] !== null ? Autolinker.link(String(feature.properties['Costo_Lbros Concpts Basicos'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">produccion telesec audiovis</th>\
+                        <td>' + (feature.properties['produccion'] !== null ? Autolinker.link(String(feature.properties['produccion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad planificadores</th>\
+                        <td>' + (feature.properties['Numero planificadores'] !== null ? Autolinker.link(String(feature.properties['Numero planificadores'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">costo planificadores</th>\
+                        <td>' + (feature.properties['Total Planificadores'] !== null ? Autolinker.link(String(feature.properties['Total Planificadores'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">capacita doc telesecu</th>\
+                        <td>' + (feature.properties['Capacitacion docente Telesecundaria'] !== null ? Autolinker.link(String(feature.properties['Capacitacion docente Telesecundaria'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total capacitacion telesecu</th>\
+                        <td>' + (feature.properties['Total capacitacion Telesecundaria'] !== null ? Autolinker.link(String(feature.properties['Total capacitacion Telesecundaria'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">docentes capacitacion guias</th>\
+                        <td>' + (feature.properties['Docentes capacitacion guias'] !== null ? Autolinker.link(String(feature.properties['Docentes capacitacion guias'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">total capacitacion guias</th>\
+                        <td>' + (feature.properties['Tot_Docentes capacitacion guias'] !== null ? Autolinker.link(String(feature.properties['Tot_Docentes capacitacion guias'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad equipo telesecu</th>\
+                        <td>' + (feature.properties['Numero_equipo Telesecundaria'] !== null ? Autolinker.link(String(feature.properties['Numero_equipo Telesecundaria'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total equipo Telesecu</th>\
+                        <td>' + (feature.properties['Total_equipo Telesecundaria'] !== null ? Autolinker.link(String(feature.properties['Total_equipo Telesecundaria'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA5</th>\
+                        <td>' + (feature.properties['total_oda5'] !== null ? Autolinker.link(String(feature.properties['total_oda5'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA5Librosyequipo_4_0(feature) {
+            if (feature.properties['total_oda5'] >= 0.000000 && feature.properties['total_oda5'] <= 101702.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda5'] >= 101702.000000 && feature.properties['total_oda5'] <= 204280.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,204,204,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda5'] >= 204280.000000 && feature.properties['total_oda5'] <= 353804.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,153,153,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda5'] >= 353804.000000 && feature.properties['total_oda5'] <= 576595.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,102,102,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda5'] >= 576595.000000 && feature.properties['total_oda5'] <= 1320968.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,51,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda5'] >= 1320968.000000 && feature.properties['total_oda5'] <= 1985593.000000 ) {
+                return {
+                pane: 'pane_ODA5Librosyequipo_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA5Librosyequipo_4');
+        map.getPane('pane_ODA5Librosyequipo_4').style.zIndex = 404;
+        map.getPane('pane_ODA5Librosyequipo_4').style['mix-blend-mode'] = 'normal';
+        var layer_ODA5Librosyequipo_4 = new L.geoJson(json_ODA5Librosyequipo_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA5Librosyequipo_4',
+            layerName: 'layer_ODA5Librosyequipo_4',
+            pane: 'pane_ODA5Librosyequipo_4',
+            onEachFeature: pop_ODA5Librosyequipo_4,
+            style: style_ODA5Librosyequipo_4_0,
+        });
+        bounds_group.addLayer(layer_ODA5Librosyequipo_4);
+        function pop_ODA3CNB_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamen</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Estudiantes1b</th>\
+                        <td>' + (feature.properties['estudiantes_nivelacion'] !== null ? Autolinker.link(String(feature.properties['estudiantes_nivelacion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo libros nivelacion</th>\
+                        <td>' + (feature.properties['costo_libros_nivelacion'] !== null ? Autolinker.link(String(feature.properties['costo_libros_nivelacion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">cantidad docentes capacitar</th>\
+                        <td>' + (feature.properties['docentes_capacita_nivelacion'] !== null ? Autolinker.link(String(feature.properties['docentes_capacita_nivelacion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo capacitacion</th>\
+                        <td>' + (feature.properties['costo_capacitacion_docente'] !== null ? Autolinker.link(String(feature.properties['costo_capacitacion_docente'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA3</th>\
+                        <td>' + (feature.properties['total_oda3'] !== null ? Autolinker.link(String(feature.properties['total_oda3'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA3CNB_5_0(feature) {
+            if (feature.properties['total_oda3'] >= 0.000000 && feature.properties['total_oda3'] <= 157715.330000 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda3'] >= 157715.330000 && feature.properties['total_oda3'] <= 311576.666667 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,204,204,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda3'] >= 311576.666667 && feature.properties['total_oda3'] <= 465438.000000 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,153,153,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda3'] >= 465438.000000 && feature.properties['total_oda3'] <= 619299.333333 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,102,102,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda3'] >= 619299.333333 && feature.properties['total_oda3'] <= 773160.666667 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,51,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda3'] >= 773160.666667 && feature.properties['total_oda3'] <= 927022.000000 ) {
+                return {
+                pane: 'pane_ODA3CNB_5',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA3CNB_5');
+        map.getPane('pane_ODA3CNB_5').style.zIndex = 405;
+        map.getPane('pane_ODA3CNB_5').style['mix-blend-mode'] = 'normal';
+        var layer_ODA3CNB_5 = new L.geoJson(json_ODA3CNB_5, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA3CNB_5',
+            layerName: 'layer_ODA3CNB_5',
+            pane: 'pane_ODA3CNB_5',
+            onEachFeature: pop_ODA3CNB_5,
+            style: style_ODA3CNB_5_0,
+        });
+        bounds_group.addLayer(layer_ODA3CNB_5);
+        function pop_ODA2Directores_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Cantidad Contratar docentes</th>\
+                        <td>' + (feature.properties['docentes_contr'] !== null ? Autolinker.link(String(feature.properties['docentes_contr'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">costo contratar docentes</th>\
+                        <td>' + (feature.properties['costo_doce'] !== null ? Autolinker.link(String(feature.properties['costo_doce'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Cantidad directores a formar</th>\
+                        <td>' + (feature.properties['directores'] !== null ? Autolinker.link(String(feature.properties['directores'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo formación directores</th>\
+                        <td>' + (feature.properties['costo_profesorado_direct'] !== null ? Autolinker.link(String(feature.properties['costo_profesorado_direct'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Cantidad asesores gestion</th>\
+                        <td>' + (feature.properties['acompañantes_gestion'] !== null ? Autolinker.link(String(feature.properties['acompañantes_gestion'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo asesores gestion</th>\
+                        <td>' + (feature.properties['costo_acompañamiento_gest'] !== null ? Autolinker.link(String(feature.properties['costo_acompañamiento_gest'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA2</th>\
+                        <td>' + (feature.properties['total_oda2'] !== null ? Autolinker.link(String(feature.properties['total_oda2'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA2Directores_6_0(feature) {
+            if (feature.properties['total_oda2'] >= 0.000000 && feature.properties['total_oda2'] <= 458826.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda2'] >= 458826.000000 && feature.properties['total_oda2'] <= 938083.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,204,204,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda2'] >= 938083.000000 && feature.properties['total_oda2'] <= 1593856.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,153,153,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda2'] >= 1593856.000000 && feature.properties['total_oda2'] <= 2586115.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,102,102,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda2'] >= 2586115.000000 && feature.properties['total_oda2'] <= 4009528.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,51,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda2'] >= 4009528.000000 && feature.properties['total_oda2'] <= 7255401.000000 ) {
+                return {
+                pane: 'pane_ODA2Directores_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA2Directores_6');
+        map.getPane('pane_ODA2Directores_6').style.zIndex = 406;
+        map.getPane('pane_ODA2Directores_6').style['mix-blend-mode'] = 'normal';
+        var layer_ODA2Directores_6 = new L.geoJson(json_ODA2Directores_6, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA2Directores_6',
+            layerName: 'layer_ODA2Directores_6',
+            pane: 'pane_ODA2Directores_6',
+            onEachFeature: pop_ODA2Directores_6,
+            style: style_ODA2Directores_6_0,
+        });
+        bounds_group.addLayer(layer_ODA2Directores_6);
+        function pop_ODA1Docentes_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Profesionalizacion docente</th>\
+                        <td>' + (feature.properties['docentes_profesionalizar'] !== null ? Autolinker.link(String(feature.properties['docentes_profesionalizar'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo profesionalizacion</th>\
+                        <td>' + (feature.properties['costo_profesio'] !== null ? Autolinker.link(String(feature.properties['costo_profesio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">acompañantes pedagogicos</th>\
+                        <td>' + (feature.properties['acompañantes_pedag'] !== null ? Autolinker.link(String(feature.properties['acompañantes_pedag'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo acompañamiento</th>\
+                        <td>' + (feature.properties['costo_acompaña'] !== null ? Autolinker.link(String(feature.properties['costo_acompaña'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Docentes a contratar</th>\
+                        <td>' + (feature.properties['docentes_contratar'] !== null ? Autolinker.link(String(feature.properties['docentes_contratar'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Costo Total Docente</th>\
+                        <td>' + (feature.properties['ct_tot_doc'] !== null ? Autolinker.link(String(feature.properties['ct_tot_doc'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total ODA1</th>\
+                        <td>' + (feature.properties['total_oda1'] !== null ? Autolinker.link(String(feature.properties['total_oda1'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_ODA1Docentes_7_0(feature) {
+            if (feature.properties['total_oda1'] >= 0.000000 && feature.properties['total_oda1'] <= 495664.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda1'] >= 495664.000000 && feature.properties['total_oda1'] <= 1024000.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,204,204,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda1'] >= 1024000.000000 && feature.properties['total_oda1'] <= 1703709.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,153,153,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda1'] >= 1703709.000000 && feature.properties['total_oda1'] <= 2648913.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,102,102,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda1'] >= 2648913.000000 && feature.properties['total_oda1'] <= 3960457.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,51,1.0)',
+                interactive: false,
+            }
+            }
+            if (feature.properties['total_oda1'] >= 3960457.000000 && feature.properties['total_oda1'] <= 9017458.000000 ) {
+                return {
+                pane: 'pane_ODA1Docentes_7',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: false,
+            }
+            }
+        }
+        map.createPane('pane_ODA1Docentes_7');
+        map.getPane('pane_ODA1Docentes_7').style.zIndex = 407;
+        map.getPane('pane_ODA1Docentes_7').style['mix-blend-mode'] = 'normal';
+        var layer_ODA1Docentes_7 = new L.geoJson(json_ODA1Docentes_7, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ODA1Docentes_7',
+            layerName: 'layer_ODA1Docentes_7',
+            pane: 'pane_ODA1Docentes_7',
+            onEachFeature: pop_ODA1Docentes_7,
+            style: style_ODA1Docentes_7_0,
+        });
+        bounds_group.addLayer(layer_ODA1Docentes_7);
+        function pop_CostototalODas_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Municipio</th>\
+                        <td>' + (feature.properties['Municipio'] !== null ? Autolinker.link(String(feature.properties['Municipio'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Departamento</th>\
+                        <td>' + (feature.properties['Departamen'] !== null ? Autolinker.link(String(feature.properties['Departamen'])) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Total</th>\
+                        <td>' + (feature.properties['Total'] !== null ? Autolinker.link(String(feature.properties['Total'])) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_CostototalODas_8_0(feature) {
+            if (feature.properties['Total'] >= 0.000000 && feature.properties['Total'] <= 2061223.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,236,210,0.9098039215686274)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 2061223.000000 && feature.properties['Total'] <= 4434972.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,219,219,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 4434972.000000 && feature.properties['Total'] <= 8277282.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,182,182,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 8277282.000000 && feature.properties['Total'] <= 12426744.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,146,146,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 12426744.000000 && feature.properties['Total'] <= 17622059.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,109,109,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 17622059.000000 && feature.properties['Total'] <= 26761957.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,73,73,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 26761957.000000 && feature.properties['Total'] <= 39521488.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,36,36,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['Total'] >= 39521488.000000 && feature.properties['Total'] <= 50583648.000000 ) {
+                return {
+                pane: 'pane_CostototalODas_8',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_CostototalODas_8');
+        map.getPane('pane_CostototalODas_8').style.zIndex = 408;
+        map.getPane('pane_CostototalODas_8').style['mix-blend-mode'] = 'normal';
+        var layer_CostototalODas_8 = new L.geoJson(json_CostototalODas_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_CostototalODas_8',
+            layerName: 'layer_CostototalODas_8',
+            pane: 'pane_CostototalODas_8',
+            onEachFeature: pop_CostototalODas_8,
+            style: style_CostototalODas_8_0,
+        });
+        bounds_group.addLayer(layer_CostototalODas_8);
+        map.addLayer(layer_CostototalODas_8);
+        var baseMaps = {};
+
+        L.Control.Layers.include({
+  getOverlays: function() {
+    // create hash to hold all layers
+    var control, layers;
+    layers = {};
+    control = this;
+
+    // loop thru all layers in control
+    control._layers.forEach(function(obj) {
+      var layerName;
+
+      // check if layer is an overlay
+      if (obj.overlay) {
+        // get name of overlay
+        layerName = obj.name;
+        // store whether it's present on the map or not
+        return layers[layerName] = control._map.hasLayer(obj.layer);
+      }
+    });
+
+    return layers;
+  }
+});
+        var control = new L.control.layers(baseMaps,{'CostototalODas_8<br /><table><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_020612230.png" /></td><td>0 - 2,061,223</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_206122344349721.png" /></td><td>2,061,223 - 4,434,972</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_443497282772822.png" /></td><td>4,434,972 - 8,277,282</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_8277282124267443.png" /></td><td>8,277,282 - 12,426,744</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_12426744176220594.png" /></td><td>12,426,744 - 17,622,059</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_17622059267619575.png" /></td><td>17,622,059 - 26,761,957</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_26761957395214886.png" /></td><td>26,761,957 - 39,521,488</td></tr><tr><td style="text-align: center;"><img src="legend/CostototalODas_8_39521488505836487.png" /></td><td>39,521,488 - 50,583,648</td></tr></table>': layer_CostototalODas_8,'ODA1Docentes_7<br /><table><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_04956640.png" /></td><td>0 - 495664</td></tr><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_49566410240001.png" /></td><td>495664 - 1024000</td></tr><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_102400017037092.png" /></td><td>1024000 - 1703709</td></tr><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_170370926489133.png" /></td><td>1703709 - 2648913</td></tr><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_264891339604574.png" /></td><td>2648913 - 3960457</td></tr><tr><td style="text-align: center;"><img src="legend/ODA1Docentes_7_396045790174585.png" /></td><td>3960457 - 9017458</td></tr></table>': layer_ODA1Docentes_7,'ODA2 Directores<br /><table><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_04588260.png" /></td><td>0 - 458,826</td></tr><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_4588269380831.png" /></td><td>458,826 - 938,083</td></tr><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_93808315938562.png" /></td><td>938,083 - 1,593,856</td></tr><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_159385625861153.png" /></td><td>1,593,856 - 2,586,115</td></tr><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_258611540095284.png" /></td><td>2,586,115 - 4,009,528</td></tr><tr><td style="text-align: center;"><img src="legend/ODA2Directores_6_400952872554015.png" /></td><td>4,009,528 - 7,255,401</td></tr></table>': layer_ODA2Directores_6,'ODA3 CNB<br /><table><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_01577150.png" /></td><td>0 - 157,715</td></tr><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_1577153115761.png" /></td><td>157,715 - 311,576</td></tr><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_3115764654382.png" /></td><td>311,576 - 465,438</td></tr><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_4654386192993.png" /></td><td>465,438 - 619,299</td></tr><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_6192997731604.png" /></td><td>619,299 - 773,160</td></tr><tr><td style="text-align: center;"><img src="legend/ODA3CNB_5_7731609270225.png" /></td><td>773,160 - 927,022</td></tr></table>': layer_ODA3CNB_5,'ODA5 Libros y equipo<br /><table><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_01017020.png" /></td><td>0 - 101,702</td></tr><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_1017022042801.png" /></td><td>101,702 - 204,280</td></tr><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_2042803538042.png" /></td><td>204,280 - 353,804</td></tr><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_3538045765953.png" /></td><td>353,804 - 576,595</td></tr><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_57659513209684.png" /></td><td>576,595 - 1,320,968</td></tr><tr><td style="text-align: center;"><img src="legend/ODA5Librosyequipo_4_132096819855935.png" /></td><td>1,320,968 - 1,985,593</td></tr></table>': layer_ODA5Librosyequipo_4,'ODA6 Infra<br /><table><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_013170240.png" /></td><td>0 - 1,317,024</td></tr><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_131702426894621.png" /></td><td>1,317,024 - 2,689,462</td></tr><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_268946242757992.png" /></td><td>2,689,462 - 4,275,799</td></tr><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_427579969086053.png" /></td><td>4,275,799 - 6,908,605</td></tr><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_6908605151211754.png" /></td><td>6,908,605 - 15,121,175</td></tr><tr><td style="text-align: center;"><img src="legend/ODA6Infra_3_15121175303841245.png" /></td><td>15,121,175 - 30,384,124</td></tr></table>': layer_ODA6Infra_3,'ODA7 Cobertura<br /><table><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_014037560.png" /></td><td>0 - 1,403,756</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_140375640319571.png" /></td><td>1,403,756 - 4,031,957</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_403195779974142.png" /></td><td>4,031,957 - 7,997,414</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_7997414125477963.png" /></td><td>7,997,414 - 12,547,796</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_12547796168565974.png" /></td><td>12,547,796 - 16,856,597</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_16856597236375475.png" /></td><td>16,856,597 - 23,637,547</td></tr><tr><td style="text-align: center;"><img src="legend/ODA7Cobertura_2_23637547306418656.png" /></td><td>23,637,547 - 30,641,865</td></tr></table>': layer_ODA7Cobertura_2,'<img src="legend/Departamentos_1.png" /> Departamentos': layer_Departamentos_1,"OpenStreetMap": layer_OpenStreetMap_0,},{collapsed:false}).addTo(map);
+        setBounds();
+
+
+        map.addControl(new L.Control.Search({
+            layer: layer_Departamentos_1,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'nombre',
+            zoom: 9}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+
+        var mapDiv = document.getElementById('caspa');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "80%";
+        var col1 = document.createElement('div');
+
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "60%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Departamen": "str"};
+
+        var mydata = [];
+        var toogle = 1;
+
+        function activa(){
+          map.eachLayer
+          function getKeyByValue(object, value) {
+            return Object.keys(object).find(key => object[key] === value);
+          }
+          mydata=[];
+
+          var di = control.getOverlays();
+          var activelayers = getKeyByValue(di,true);
+          var campos = activelayers.split("<");
+          var capa = campos[0];
+
+          var cap="json_".concat(capa);
+
+          console.log(cap);
+
+        mydata.push(capas[cap]);
+
+        /*switch(cap){
+            case "json_CostototalODas_8":
+                mydata.push(json_CostototalODas_8);
+                break;
+            case "json_ODA1Docentes_7":
+                mydata.push(json_ODA1Docentes_7);
+                break;
+            case "json_ODA2 Directores":
+                mydata.push(json_ODA2Directores_6);
+                break;
+            case "json_ODA3 CNB"
+
+        }*/
+/*
+        if (cap=="json_CostototalODas_8"){
+            console.log("pusheo json_CostototalODas_8");
+            console.log(json_CostototalODas_8);
+            mydata.push(json_CostototalODas_8);
+        }
+
+        if (cap=="json_ODA1Docentes_7"){
+            console.log("pusheo json_ODA1Docentes_7");
+            console.log(json_ODA1Docentes_7);
+            mydata.push(json_ODA1Docentes_7);
+        }*/
+
+        actualizarTabla();
+            return cap;
+}
+
+        /*ESTO SIRVE PARA LINKEAR CADA NOMBRE CON SU VARIABLE*/
+        var capas = {
+                        "json_CostototalODas_8":json_CostototalODas_8,
+                        "json_ODA1Docentes_7":json_ODA1Docentes_7,
+                        "json_ODA2 Directores":json_ODA2Directores_6,
+                        "json_ODA3 CNB":json_ODA3CNB_5,
+                        "json_ODA5 Libros y equipo":json_ODA5Librosyequipo_4,
+                        "json_ODA6 Infra":json_ODA6Infra_3,
+                        "json_ODA7 Cobertura":json_ODA7Cobertura_2
+                    };
+
+          //mydata.push(json_CostototalODas_8);
+          //mydata.push(json_ODA1Docentes_7);
+        //mydata.push(json_ODA1Docentes_7);
+/*        mydata.push(json_CostototalODas_8)
+
+        map.on("overlayadd", function(e){activa();
+        console.log("overlay")});
+        var caldo = activa();
+        console.log(caldo);
+        caldo.onchange = function(){filterFunc();mostrarTabla();activa();};
+        console.log("MARA");
+        console.log(caldo);
+        var cap="json_".concat(caldo);
+
+*/
+
+
+
+
+
+
+
+
+
+
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+
+            try{
+              for (key in Filters){
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + key).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + key).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + key).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+
+
+        var div_Departamen = document.getElementById("menup")
+       /* document.getElementById("menu").appendChild(div_Departamen);
+       */
+        sel_Departamen = document.createElement('select');
+        sel_Departamen.multiple = true;
+        sel_Departamen.id = "sel_Departamen";
+        sel_Departamen.className ="form-control"
+        var Departamen_options_str = "<option value='' unselected></option>";
+        sel_Departamen.onchange = function(){activa(); filterFunc();mostrarTabla();};
+        Departamen_options_str  += '<option value="Alta Verapaz">Alta Verapaz</option>';
+        Departamen_options_str  += '<option value="Baja Verapaz">Baja Verapaz</option>';
+        Departamen_options_str  += '<option value="Chimaltenango">Chimaltenango</option>';
+        Departamen_options_str  += '<option value="Chiquimula">Chiquimula</option>';
+        Departamen_options_str  += '<option value="El Progreso">El Progreso</option>';
+        Departamen_options_str  += '<option value="Escuintla">Escuintla</option>';
+        Departamen_options_str  += '<option value="Guatemala">Guatemala</option>';
+
+        Departamen_options_str  += '<option value="Huehuetenango">Huehuetenango</option>';
+        Departamen_options_str  += '<option value="Izabal">Izabal</option>';
+        Departamen_options_str  += '<option value="Jalapa">Jalapa</option>';
+        Departamen_options_str  += '<option value="Jutiapa">Jutiapa</option>';
+        Departamen_options_str  += '<option value="Peten">Peten</option>';
+        Departamen_options_str  += '<option value="Quetzaltenango">Quetzaltenango</option>';
+        Departamen_options_str  += '<option value="Quiche">Quiche</option>';
+        Departamen_options_str  += '<option value="Retalhuleu">Retalhuleu</option>';
+        Departamen_options_str  += '<option value="Sacatepequez">Sacatepequez</option>';
+        Departamen_options_str  += '<option value="San Marcos">San Marcos</option>';
+        Departamen_options_str  += '<option value="Santa Rosa">Santa Rosa</option>';
+        Departamen_options_str  += '<option value="Solola">Solola</option>';
+        Departamen_options_str  += '<option value="Suchitepequez">Suchitepequez</option>';
+        Departamen_options_str  += '<option value="Totonicapan">Totonicapan</option>';
+        Departamen_options_str  += '<option value="Zacapa">Zacapa</option>';
+        sel_Departamen.innerHTML = Departamen_options_str;
+        div_Departamen.appendChild(sel_Departamen);
+        var lab_Departamen = document.createElement('div');
+        lab_Departamen.innerHTML = 'Departamen';
+        lab_Departamen.className = 'filterlabel';
+        div_Departamen.appendChild(lab_Departamen);
+        var reset_Departamen = document.createElement('div');
+        reset_Departamen.innerHTML = 'clear filter';
+        reset_Departamen.className = 'filterlabel';
+        reset_Departamen.onclick = function() {
+            var options = document.getElementById("sel_Departamen").options;
+            for (var i=0; i < options.length; i++) {
+                options[i].selected = false;
+            }
+            filterFunc();
+            mostrarTabla();
+            activa();
+
+
+        };
+            div_Departamen.appendChild(reset_Departamen);
+
+
+
+        </script>
+        <!--Nuevo-->
+        <script src="js/tabla.datos.js"></script>
+        <script>
+
+
+
+
+
+
+
+
+      </script>
+
+        <style>
+
+
+
+
+            </style>
+
+    </body>
+</html>
